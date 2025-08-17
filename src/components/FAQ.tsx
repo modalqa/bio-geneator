@@ -6,7 +6,7 @@ export default function FAQ() {
         <div className="space-y-6">
           <div className="bg-orange-50/50 rounded-lg p-4 sm:p-6">
             <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">Is this AI Bio Generator free to use?</h3>
-            <p className="text-gray-700 text-sm sm:text-base">Yes, it's completely free for personal use.</p>
+            <p className="text-gray-700 text-sm sm:text-base">Yes, it is completely free for personal use.</p>
           </div>
           <div className="bg-orange-50/50 rounded-lg p-4 sm:p-6">
             <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">Can I generate bio for multiple platforms?</h3>
