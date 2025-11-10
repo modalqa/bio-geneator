@@ -5,25 +5,36 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Trigger Test Suite
         id: trigger
         env:
           ACCESS_TOKEN: ${{ secrets.HEYBUGS_ACCESS_TOKEN }}
         run: |
-          RESPONSE=$(curl -X POST https://hermelinda-adverbless-doomfully.ngrok-free.dev/api/projects/4b352491-49a7-4c75-ab4d-bf6d0d178f3e/test-suites/524973e4-0fa7-49ed-9489-25025a25f19c/run \
+          RESPONSE=$(curl -s -X POST "https://hermelinda-adverbless-doomfully.ngrok-free.dev/api/projects/4b352491-49a7-4c75-ab4d-bf6d0d178f3e/test-suites/524973e4-0fa7-49ed-9489-25025a25f19c/run" \
             -H "Authorization: Bearer $ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
+            -H "User-Agent: GitHubActions" \
             -d "{}")
-          RUN_ID=$(echo \$RESPONSE | jq -r '.data.runId')
-          echo "run_id=\$RUN_ID" >> \$GITHUB_OUTPUT
-          
+
+          echo "Response: $RESPONSE"
+
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.data.runId')
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+
       - name: Wait for Completion
         run: sleep 30
-        
+
       - name: Check Status
         env:
           ACCESS_TOKEN: ${{ secrets.HEYBUGS_ACCESS_TOKEN }}
         run: |
-          STATUS=$(curl -s "https://hermelinda-adverbless-doomfully.ngrok-free.dev/api/projects/4b352491-49a7-4c75-ab4d-bf6d0d178f3e/test-suites/524973e4-0fa7-49ed-9489-25025a25f19c/execution-status?runId=${{ steps.trigger.outputs.run_id }}&format=simple" \
-            -H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.status')
+          STATUS=$(curl -s \
+            "https://hermelinda-adverbless-doomfully.ngrok-free.dev/api/projects/4b352491-49a7-4c75-ab4d-bf6d0d178f3e/test-suites/524973e4-0fa7-49ed-9489-25025a25f19c/execution-status?runId=${{ steps.trigger.outputs.run_id }}&format=simple" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "User-Agent: GitHubActions" \
+            | jq -r '.status')
+
+          echo "Status: $STATUS"
           [ "$STATUS" = "PASSED" ] || exit 1
