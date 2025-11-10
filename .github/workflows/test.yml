@@ -1,0 +1,21 @@
+name: Run Test Suite
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Test Suite
+        id: trigger
+        run: |
+          RESPONSE=$(curl -X POST https://hermelinda-adverbless-doomfully.ngrok-free.dev/api/projects/4b352491-49a7-4c75-ab4d-bf6d0d178f3e/test-suites/524973e4-0fa7-49ed-9489-25025a25f19c/run)
+          RUN_ID=$(echo $RESPONSE | jq -r '.data.runId')
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          
+      - name: Wait for Completion
+        run: sleep 30
+        
+      - name: Check Status
+        run: |
+          STATUS=$(curl -s "https://hermelinda-adverbless-doomfully.ngrok-free.dev/api/projects/4b352491-49a7-4c75-ab4d-bf6d0d178f3e/test-suites/524973e4-0fa7-49ed-9489-25025a25f19c/execution-status?runId=${{ steps.trigger.outputs.run_id }}&format=simple" | jq -r '.status')
+          [ "$STATUS" = "PASSED" ] || exit 1
